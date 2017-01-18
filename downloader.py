@@ -1,5 +1,5 @@
 #coding:utf-8  #must be line 1
-#  2016/12 python2
+#  2017/01 python2
 # 多线程发送 ajax 搜索到10个视频 token和vid
 #每个视频发送getMore Ajax请求媒体的tag（137）和扩展名。根据v，t，tag计算link
 # cookie需要当日从浏览器访问该网站更新一下，否则会返回204 508。。。。
@@ -12,10 +12,10 @@ import sys,urllib,re,threading , Queue ,time, json, os
 reload(sys) 
 sys.setdefaultencoding('gb18030') #for UnicodeDecodeError: 'ascii' codec can't decode byte 0xa1 in position 0: ordinal not in range(128)
 
-USE_PROXY = 0     #home use   
+USE_PROXY = 1     #home use   
 
 
-CHECK_FILE_EXIST_FLAG = True  # 检查文件是否已经在目录和目录列表（下面定义）
+CHECK_FILE_EXIST_FLAG = False  # 检查文件是否已经在目录和目录列表（下面定义）
 OTHER_DOWN_FILE_DIR = ["H:\\youtube\\"]  #other for check
 #host = "www.converdio.com"
 #host = 'downloads99.com'
@@ -30,23 +30,25 @@ host = "mp3play.org"
  
 #keyWord="Apple (UCE_M8A5yxnLfW0KghEeajjw)"
  
+keyWordList = ["test1", "test2"]
+global keyWord, keyWordURL,RequestDefaulHeader
 
- 
-DOWN_FILE_DIR = "H:\youtube"
+DOWN_FILE_DIR = ".\\"   #"H:\youtube"
+
+#strMonDate = time.strftime("%m%d",time.localtime())
 #0 不指定下载格式,默认按后面顺序/137 1080p光视频 /136 720光视频/22下载720p视频音频/
 itagToDOWN = 0  #不指定0的情况下，如果指定格式没找到，才会返回第一个数字的mp4
 DROP_LOW_RES = True  # 是否丢弃低于720p
 
-strMonDate = time.strftime("%m%d",time.localtime())
-LINK_FILE_NAME =  keyWord +"_"+ host+strMonDate+"_link.txt"
+
  
  
 #corp use
 #DOWN_FILE_DIR = "f:/Download" #for judge if file existed
 #USE_PROXY = 1     #是否使用代理
 
-USE_PROXYFILE = 0  #是否使用代理列表文件读出多个代理扫描
-PROXY_SERVER = {"http":" : "} #固定代理 ，USE_PROXYFILE =0启用
+USE_PROXYFILE = 1  #是否使用代理列表文件读出多个代理扫描
+PROXY_SERVER = {"http":""} #固定代理 ，USE_PROXYFILE =0启用
 bRunMT = True  #false sing thread run
 MAXTHREADS_NUM = 10
 
@@ -57,7 +59,7 @@ FILE_EXIST_FLAG ="!!!"   # 在 DOWN_FILE_DIR找到同名文件则前面加上这
 
 URL  = "http://"+ host
 Request_URL =  URL +"/ajax"	
-keyWordURL = URL +'/'+ urllib.quote(keyWord)
+
 PageNum  = 0 
 
 
@@ -71,23 +73,11 @@ test_downloadlink ="http://youtubemp3.scriptscraft.com/download/FABEB0E5-B09D51B
 
 linesWrited = 0
 
-RequestDefaulHeader = {                
-        'Accept':'application/json, text/javascript, */*; q=0.01',
-        'Accept-Encoding':'gzip,deflate', #Exception :'utf8' codec can't decode byte 0x8b in position 1: invalid start byte
-        'Accept-Language':'zh-CN,zh;q=0.8',
-        'User-Agent':'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36',
-        'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8',
-        'Connection':'keep-alive',
-       	'Host':host,
-        'Origin':URL,
-        'Cookie':'PHPSESSID=2uahdsiq1hd10k5r3p7bfbuo73; __atuvc=1%7C32%2C1%7C33; __atuvs=57b807c13331561e000; _ga=GA1.2.2099785564.1471678404; noadvtday=0;'+
-                 "searchTerm="+urllib.quote(keyWord),
-   	    'X-Requested-With':'XMLHttpRequest',
-        'Refer':keyWordURL
-        }
+
 
 
 def sendSearchAjax(directAction):
+    global keyWord, keyWordURL,RequestDefaulHeader
     global PageNum  
     PageNum = PageNum + 1   
     print("search %s %s-%s\n "%(keyWordURL, PageNum*10-9,  PageNum*10 ))
@@ -121,7 +111,7 @@ def sendSearchAjax(directAction):
 
 
 def sendgetMoreAjax(v, t):
-    
+    global keyWord, keyWordURL,RequestDefaulHeader
     thisHeader =  RequestDefaulHeader
     #thisHeader['Refer'] = keyWordURL
    
@@ -453,17 +443,39 @@ def UnitTest():
 
 
 if __name__ == '__main__':
+  global keyWord, keyWordURL,RequestDefaulHeader
   if (not bRunMT):
       print("run single thread !")
   if (itagToDOWN == 22):
       print("Only search 720P video with audio !")
   if (itagToDOWN == 137):
       print("Only search 1080p video stream , NO audio !")
+
+
+  #LINK_FILE_NAME =  keyWord +"_"+ host+strMonDate+"_link.txt"
+  LINK_FILE_NAME =  "link.txt"  #all keyWord result write to a file      
+
   print ("result will store in the file folder named %s\%s"%(DOWN_FILE_DIR,LINK_FILE_NAME))
 
   #UnitTest()    
-  getLink()
-  print("ttl %s lines writed" % linesWrited)
+  for keyWord in keyWordList:
+    keyWordURL = URL +'/'+ urllib.quote(keyWord)
+    RequestDefaulHeader = {                
+        'Accept':'application/json, text/javascript, */*; q=0.01',
+        'Accept-Encoding':'gzip,deflate', #Exception :'utf8' codec can't decode byte 0x8b in position 1: invalid start byte
+        'Accept-Language':'zh-CN,zh;q=0.8',
+        'User-Agent':'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36',
+        'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8',
+        'Connection':'keep-alive',
+        'Host':host,
+        'Origin':URL,
+        'Cookie':'PHPSESSID=2uahdsiq1hd10k5r3p7bfbuo73; __atuvc=1%7C32%2C1%7C33; __atuvs=57b807c13331561e000; _ga=GA1.2.2099785564.1471678404; noadvtday=0;'+
+                 "searchTerm="+urllib.quote(keyWord),
+        'X-Requested-With':'XMLHttpRequest',
+        'Refer':keyWordURL
+        }
+    getLink()
+    print("ttl %s lines writed" % linesWrited)
 
 
  

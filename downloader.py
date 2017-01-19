@@ -28,10 +28,10 @@ host = "mytube.az"
 host = "mp3play.org"
 
  
-#keyWord="Apple (UCE_M8A5yxnLfW0KghEeajjw)"
+keyWord="Apple (UCE_M8A5yxnLfW0KghEeajjw)"
  
 keyWordList = ["test1", "test2"]
-global keyWord, keyWordURL,RequestDefaulHeader
+
 
 DOWN_FILE_DIR = ".\\"   #"H:\youtube"
 
@@ -77,7 +77,7 @@ linesWrited = 0
 
 
 def sendSearchAjax(directAction):
-    global keyWord, keyWordURL,RequestDefaulHeader
+   
     global PageNum  
     PageNum = PageNum + 1   
     print("search %s %s-%s\n "%(keyWordURL, PageNum*10-9,  PageNum*10 ))
@@ -111,7 +111,7 @@ def sendSearchAjax(directAction):
 
 
 def sendgetMoreAjax(v, t):
-    global keyWord, keyWordURL,RequestDefaulHeader
+    
     thisHeader =  RequestDefaulHeader
     #thisHeader['Refer'] = keyWordURL
    
@@ -443,7 +443,7 @@ def UnitTest():
 
 
 if __name__ == '__main__':
-  global keyWord, keyWordURL,RequestDefaulHeader
+  
   if (not bRunMT):
       print("run single thread !")
   if (itagToDOWN == 22):
@@ -475,7 +475,7 @@ if __name__ == '__main__':
         'Refer':keyWordURL
         }
     getLink()
-    print("ttl %s lines writed" % linesWrited)
+  print("ttl %s lines writed" % linesWrited)
 
 
  

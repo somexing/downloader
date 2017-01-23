@@ -12,7 +12,7 @@ import sys,urllib,re,threading , Queue ,time, json, os
 reload(sys) 
 sys.setdefaultencoding('gb18030') #for UnicodeDecodeError: 'ascii' codec can't decode byte 0xa1 in position 0: ordinal not in range(128)
 
-USE_PROXY = 1     #home use   
+ 
 
 
 CHECK_FILE_EXIST_FLAG = False  # 检查文件是否已经在目录和目录列表（下面定义）
@@ -28,16 +28,16 @@ host = "mytube.az"
 host = "mp3play.org"
 
  
-keyWord="Apple (UCE_M8A5yxnLfW0KghEeajjw)"
+#keyWord="Apple (UCE_M8A5yxnLfW0KghEeajjw)"
  
-keyWordList = ["test1", "test2"]
+keyWordList = ["2018", "2019"]
 
 
 DOWN_FILE_DIR = ".\\"   #"H:\youtube"
 
 #strMonDate = time.strftime("%m%d",time.localtime())
 #0 不指定下载格式,默认按后面顺序/137 1080p光视频 /136 720光视频/22下载720p视频音频/
-itagToDOWN = 0  #不指定0的情况下，如果指定格式没找到，才会返回第一个数字的mp4
+itagToDOWN = 137  #不指定0的情况下，如果指定格式没找到，才会返回第一个数字的mp4
 DROP_LOW_RES = True  # 是否丢弃低于720p
 
 
@@ -45,10 +45,11 @@ DROP_LOW_RES = True  # 是否丢弃低于720p
  
 #corp use
 #DOWN_FILE_DIR = "f:/Download" #for judge if file existed
-#USE_PROXY = 1     #是否使用代理
 
-USE_PROXYFILE = 1  #是否使用代理列表文件读出多个代理扫描
-PROXY_SERVER = {"http":""} #固定代理 ，USE_PROXYFILE =0启用
+
+#USE_PROXYFILE = 1  #是否使用代理列表文件读出多个代理扫描
+USE_PROXY = 1     #是否使用代理
+PROXY_SERVER = {"http":"10.94.72.26:8080"} #固定代理 ，USE_PROXYFILE =0启用
 bRunMT = True  #false sing thread run
 MAXTHREADS_NUM = 10
 
@@ -69,7 +70,7 @@ test_keyWord='x'
 test_id= "szKxAdvlCCM"
 test_title= "21 Savage & Metro Boomin - X ft Future (Official Audio)"
 test_token="FABE-B0E5-B09D-51B2-4931-F938-B117-8CF0"
-test_downloadlink ="http://youtubemp3.scriptscraft.com/download/FABEB0E5-B09D51B2-4931F938-B1178CF0-737A4B78-4164766C-43434D00-00000089/21+Savage+%26+Metro+Boomin+-+X+ft+Future+(Official+Audio)%20-%20(youtubemp3.scriptscraft.com)%201080p.mp4"
+test_downloadlink = URL +"/download/FABEB0E5-B09D51B2-4931F938-B1178CF0-737A4B78-4164766C-43434D00-00000089/21+Savage+%26+Metro+Boomin+-+X+ft+Future+(Official+Audio)%20-%20(youtubemp3.scriptscraft.com)%201080p.mp4"
 
 linesWrited = 0
 
@@ -77,7 +78,7 @@ linesWrited = 0
 
 
 def sendSearchAjax(directAction):
-   
+ 
     global PageNum  
     PageNum = PageNum + 1   
     print("search %s %s-%s\n "%(keyWordURL, PageNum*10-9,  PageNum*10 ))
@@ -111,7 +112,7 @@ def sendSearchAjax(directAction):
 
 
 def sendgetMoreAjax(v, t):
-    
+   
     thisHeader =  RequestDefaulHeader
     #thisHeader['Refer'] = keyWordURL
    
@@ -354,9 +355,7 @@ def getDownLinkFunc(eachV):
 def getLink():
     global linesWrited
     jsn = sendSearchAjax(None)
-    if os.path.isdir(DOWN_FILE_DIR) is False:
-      os.mkdir(DOWN_FILE_DIR)
-    f = open(DOWN_FILE_DIR+'\\'+LINK_FILE_NAME, 'w')
+
                                               
     while (jsn != None):    
          
@@ -394,14 +393,14 @@ def getLink():
 
          linesWrited += _counter
          jsn = sendSearchAjax(directAction)
-    f.close() 
+  
 
 
 
 def  _getLinkST():  #single thread , slow
    
    jsn = sendSearchAjax(None)
-   f = open(LINK_FILE_NAME, 'w')
+ 
    while (jsn != None):
       if (jsn["status"] is False):                        	
          print("sendSearchAjax get json status is False")    
@@ -425,7 +424,7 @@ def  _getLinkST():  #single thread , slow
 
       jsn = sendSearchAjax(directAction)  
 
-   f.close()  
+  
 
 
 def UnitTest():
@@ -443,7 +442,7 @@ def UnitTest():
 
 
 if __name__ == '__main__':
-  
+
   if (not bRunMT):
       print("run single thread !")
   if (itagToDOWN == 22):
@@ -456,7 +455,9 @@ if __name__ == '__main__':
   LINK_FILE_NAME =  "link.txt"  #all keyWord result write to a file      
 
   print ("result will store in the file folder named %s\%s"%(DOWN_FILE_DIR,LINK_FILE_NAME))
-
+  if os.path.isdir(DOWN_FILE_DIR) is False:
+      os.mkdir(DOWN_FILE_DIR)
+  f = open(DOWN_FILE_DIR+'\\'+LINK_FILE_NAME, 'w')
   #UnitTest()    
   for keyWord in keyWordList:
     keyWordURL = URL +'/'+ urllib.quote(keyWord)
@@ -475,6 +476,8 @@ if __name__ == '__main__':
         'Refer':keyWordURL
         }
     getLink()
+    f.write("%s links get completed.-------------------------------------------\n"%keyWord)   
+  f.close()
   print("ttl %s lines writed" % linesWrited)
 
 

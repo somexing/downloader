@@ -49,7 +49,7 @@ DROP_LOW_RES = True  # 是否丢弃低于720p
 
 #USE_PROXYFILE = 1  #是否使用代理列表文件读出多个代理扫描
 USE_PROXY = 1     #是否使用代理
-PROXY_SERVER = {"http":"10.94.72.26:8080"} #固定代理 ，USE_PROXYFILE =0启用
+PROXY_SERVER = {"http":":8080"} #固定代理 ，USE_PROXYFILE =0启用
 bRunMT = True  #false sing thread run
 MAXTHREADS_NUM = 10
 

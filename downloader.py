@@ -1,5 +1,6 @@
 #coding:utf-8  #must be line 1
-#  2017/01 python2
+# python2
+# 已搜索过的保存成一个当前目录下文件 visited.txt 17/1/29
 # 多线程发送 ajax 搜索到10个视频 token和vid
 #每个视频发送getMore Ajax请求媒体的tag（137）和扩展名。根据v，t，tag计算link
 # cookie需要当日从浏览器访问该网站更新一下，否则会返回204 508。。。。
@@ -12,44 +13,41 @@ import sys,urllib,re,threading , Queue ,time, json, os
 reload(sys) 
 sys.setdefaultencoding('gb18030') #for UnicodeDecodeError: 'ascii' codec can't decode byte 0xa1 in position 0: ordinal not in range(128)
 
+USE_PROXY = 0     #home use   
+
+FILE_NAME_VISITED = ".//visited.txt"
+CHECK_FILE_EXIST_FLAG = True  # 检查文件是否已经在目录和目录列表（下面定义）
+OTHER_DOWN_FILE_DIR=["H:\\temp"]#otherforcheck
  
-
-
-CHECK_FILE_EXIST_FLAG = False  # 检查文件是否已经在目录和目录列表（下面定义）
-OTHER_DOWN_FILE_DIR = ["H:\\youtube\\"]  #other for check
-#host = "www.converdio.com"
-#host = 'downloads99.com'
-#host = "loreleikoren.com"
-#host = "mvlse.org"
-
-host = 'mp3alpha.com'
 host = 'mytubeconverter.com'
-host = "mytube.az"
-host = "mp3play.org"
-
+h 
  
-#keyWord="Apple (UCE_M8A5yxnLfW0KghEeajjw)"
+
+
+keyWord="x"
  
-keyWordList = ["2018", "2019"]
+ 
+ 
 
+keyWordList = [keyWord ]
+ 
 
-DOWN_FILE_DIR = ".\\"   #"H:\youtube"
-
-#strMonDate = time.strftime("%m%d",time.localtime())
+DOWN_FILE_DIR = ".\\"
 #0 不指定下载格式,默认按后面顺序/137 1080p光视频 /136 720光视频/22下载720p视频音频/
-itagToDOWN = 137  #不指定0的情况下，如果指定格式没找到，才会返回第一个数字的mp4
-DROP_LOW_RES = True  # 是否丢弃低于720p
+itagToDOWN = 0  #不指定0的情况下，如果指定格式没找到，才会返回第一个数字的mp4
+DROP_LOW_RES = False  # 是否丢弃低于720p
 
+strMonDate = time.strftime("%m%d",time.localtime())
+#LINK_FILE_NAME =  keyWord +"_"+ host+strMonDate+"_link.txt"
 
  
  
 #corp use
 #DOWN_FILE_DIR = "f:/Download" #for judge if file existed
+#USE_PROXY = 1     #是否使用代理
 
-
-#USE_PROXYFILE = 1  #是否使用代理列表文件读出多个代理扫描
-USE_PROXY = 1     #是否使用代理
-PROXY_SERVER = {"http":":8080"} #固定代理 ，USE_PROXYFILE =0启用
+USE_PROXYFILE = 0  #是否使用代理列表文件读出多个代理扫描
+PROXY_SERVER={"http":""}#固定代理，USE_PROXYFILE=0启用
 bRunMT = True  #false sing thread run
 MAXTHREADS_NUM = 10
 
@@ -70,7 +68,7 @@ test_keyWord='x'
 test_id= "szKxAdvlCCM"
 test_title= "21 Savage & Metro Boomin - X ft Future (Official Audio)"
 test_token="FABE-B0E5-B09D-51B2-4931-F938-B117-8CF0"
-test_downloadlink = URL +"/download/FABEB0E5-B09D51B2-4931F938-B1178CF0-737A4B78-4164766C-43434D00-00000089/21+Savage+%26+Metro+Boomin+-+X+ft+Future+(Official+Audio)%20-%20(youtubemp3.scriptscraft.com)%201080p.mp4"
+test_downloadlink ="http://youtubemp3.scriptscraft.com/download/FABEB0E5-B09D51B2-4931F938-B1178CF0-737A4B78-4164766C-43434D00-00000089/21+Savage+%26+Metro+Boomin+-+X+ft+Future+(Official+Audio)%20-%20(youtubemp3.scriptscraft.com)%201080p.mp4"
 
 linesWrited = 0
 
@@ -78,7 +76,7 @@ linesWrited = 0
 
 
 def sendSearchAjax(directAction):
- 
+
     global PageNum  
     PageNum = PageNum + 1   
     print("search %s %s-%s\n "%(keyWordURL, PageNum*10-9,  PageNum*10 ))
@@ -112,7 +110,7 @@ def sendSearchAjax(directAction):
 
 
 def sendgetMoreAjax(v, t):
-   
+    
     thisHeader =  RequestDefaulHeader
     #thisHeader['Refer'] = keyWordURL
    
@@ -179,7 +177,7 @@ def getMediaInfo(v, t):
 
     return ["",0] 
     
-
+ 
 
     
 def getDownLink(video, vToken,   vTitle ,vExtension, mediaTAG):
@@ -221,22 +219,28 @@ def getDownLink(video, vToken,   vTitle ,vExtension, mediaTAG):
     c='-'.join(b)            
     downloadLink = URL + '/download/' + c + '/' + downloadName+ tagName+'.' + vExtension     
 
+    print("find %s\n"% (vTitle.encode("gb18030")))
+
     if (not CHECK_FILE_EXIST_FLAG):
         return downloadLink
-     
+ 
+    for lineText in filelinesInVisitfile:
+      if (vTitle in lineText):        
+        print("!!!   file visited !!! %s\n"% (vTitle.encode("gb18030")))
+        return None
+
     #vTitle = vTitle[:len(vTitle)-6]  #ignore right 6 char for ?,中文
     errorchar=['*','!','"',':','|','/']  
     for thechar in errorchar:
        vTitle = vTitle.replace(thechar, '_')
     vTitle = vTitle.replace('?', '') #ending
     vTitle = vTitle.strip()
-    #for the downloaded filename replace ! with _
-
-   
+    #for the downloaded filename replace ! with _ 
     
     fileList = os.listdir(DOWN_FILE_DIR)
     for file in fileList:
       if (vTitle in file):        
+        fileVisited.write("%s\n"%(vTitle.encode("gb18030")))        
         print("!!!   file existed !!! %s\n"% (vTitle.encode("gb18030")))
         return None #FILE_EXIST_FLAG + downloadLink
 
@@ -246,10 +250,14 @@ def getDownLink(video, vToken,   vTitle ,vExtension, mediaTAG):
       fileList_ = os.listdir(other_DIR)
       for file in fileList_:
         if (vTitle in file):
+          fileVisited.write("%s\n"%(vTitle.encode("gb18030")))
           print("!!!   file existed !!! %s\n"% (vTitle.encode("gb18030")))
+          
           return None #FILE_EXIST_FLAG + downloadLink
     	  
-  
+    fileVisited.write("%s\n"%(vTitle.encode("gb18030")))
+    fileVisited.flush()
+
     return downloadLink
 
 
@@ -313,7 +321,7 @@ class MT(object):
                while not self._queue.empty():                  
                   rt = self._queue.get() #returnValue is a list, see getDownLinkFunc  
                   counter+= writeResult(fpresult, rt)                                            
-               #fpresult.flush()
+               fpresult.flush()
                return counter
 
 def writeResult(fpresult, rt):  #returnValue is a list, see getDownLinkFunc
@@ -355,7 +363,6 @@ def getDownLinkFunc(eachV):
 def getLink():
     global linesWrited
     jsn = sendSearchAjax(None)
-
                                               
     while (jsn != None):    
          
@@ -393,14 +400,14 @@ def getLink():
 
          linesWrited += _counter
          jsn = sendSearchAjax(directAction)
-  
+
 
 
 
 def  _getLinkST():  #single thread , slow
    
    jsn = sendSearchAjax(None)
- 
+   f = open(LINK_FILE_NAME, 'w')
    while (jsn != None):
       if (jsn["status"] is False):                        	
          print("sendSearchAjax get json status is False")    
@@ -424,7 +431,7 @@ def  _getLinkST():  #single thread , slow
 
       jsn = sendSearchAjax(directAction)  
 
-  
+   f.close()  
 
 
 def UnitTest():
@@ -442,7 +449,7 @@ def UnitTest():
 
 
 if __name__ == '__main__':
-
+ 
   if (not bRunMT):
       print("run single thread !")
   if (itagToDOWN == 22):
@@ -455,10 +462,22 @@ if __name__ == '__main__':
   LINK_FILE_NAME =  "link.txt"  #all keyWord result write to a file      
 
   print ("result will store in the file folder named %s\%s"%(DOWN_FILE_DIR,LINK_FILE_NAME))
-  if os.path.isdir(DOWN_FILE_DIR) is False:
-      os.mkdir(DOWN_FILE_DIR)
-  f = open(DOWN_FILE_DIR+'\\'+LINK_FILE_NAME, 'w')
+
   #UnitTest()    
+  if os.path.isdir(DOWN_FILE_DIR) is False:
+    os.mkdir(DOWN_FILE_DIR)
+  f = open(DOWN_FILE_DIR+'\\'+LINK_FILE_NAME, 'w')
+
+ # if (os.path.exists(FILE_NAME_VISITED) ):
+  fileVisited = open(FILE_NAME_VISITED, 'a+' ) 
+  filelinesInVisitfile = fileVisited.readlines()
+  for lineText in filelinesInVisitfile:
+    print ("visited:%s"%lineText)
+  print ("ttl visited:%s"%len(filelinesInVisitfile))  
+
+  #else
+  #    fileVisited = open(FILE_NAME_VISITED, 'w+') 
+
   for keyWord in keyWordList:
     keyWordURL = URL +'/'+ urllib.quote(keyWord)
     RequestDefaulHeader = {                
@@ -475,10 +494,11 @@ if __name__ == '__main__':
         'X-Requested-With':'XMLHttpRequest',
         'Refer':keyWordURL
         }
+
     getLink()
-    f.write("%s links get completed.-------------------------------------------\n"%keyWord)   
-  f.close()
-  print("ttl %s lines writed" % linesWrited)
+    print("ttl %s lines writed" % linesWrited)
+  f.close() 
+  fileVisited.close()
 
 
  

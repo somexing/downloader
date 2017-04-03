@@ -1,5 +1,5 @@
 #coding:utf-8  #must be line 1
-# python2
+# python2  
 # 已搜索过的保存成一个当前目录下文件 visited.txt 17/1/29
 # 多线程发送 ajax 搜索到10个视频 token和vid
 #每个视频发送getMore Ajax请求媒体的tag（137）和扩展名。根据v，t，tag计算link

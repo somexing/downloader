@@ -8,7 +8,6 @@
 #文件名"|!:改为_ ?去掉空格比较文件名。下载的url转义过的文件名写文件中是这样的
 #制定下载22tag是带音频的，文件名带720P。137只是1080p视频
 
-
 import requests
 import sys,urllib,re,threading , Queue ,time, json, os
 reload(sys) 
